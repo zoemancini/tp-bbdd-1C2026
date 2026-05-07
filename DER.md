@@ -1,5 +1,4 @@
 ```mermaid
-
 erDiagram
 direction LR
 
@@ -14,6 +13,7 @@ direction LR
 
     AGENTE {
         bigint Legajo PK
+        bigint Agencia_Nro_Agencia FK
         nvarchar(255) Nombre
         nvarchar(255) Apellido
         nvarchar(255) Dni
@@ -23,11 +23,11 @@ direction LR
         nvarchar(255) Direccion
         nvarchar(255) Localidad
         nvarchar(255) Provincia
-        bigint Agencia_Nro_Agencia FK
     }
 
     CLIENTE {
-        nvarchar(255) Dni PK
+        bigint ID_Cliente PK
+        nvarchar(255) Dni
         nvarchar(255) Nombre
         nvarchar(255) Apellido
         nvarchar(255) Tel
@@ -39,7 +39,7 @@ direction LR
     }
 
     PROVEEDOR {
-        int ID_Proveedor PK
+        bigint ID_Proveedor PK
         nvarchar(255) Nombre
         nvarchar(255) Mail
         nvarchar(255) Telefono
@@ -61,11 +61,11 @@ direction LR
 
     VUELO {
         bigint ID_Vuelo PK
-        date Fecha_Salida
-        nvarchar(50) Horario_Salida
         nvarchar(255) Aerolinea_Codigo FK
         nvarchar(10) Aeropuerto_Salida_Codigo FK
         nvarchar(10) Aeropuerto_Llegada_Codigo FK
+        date Fecha_Salida
+        nvarchar(50) Horario_Salida
         date Fecha_Llegada
         nvarchar(50) Horario_Llegada
         int Duracion
@@ -75,7 +75,7 @@ direction LR
     }
 
     HOSPEDAJE {
-        int ID_Hospedaje PK
+        bigint ID_Hospedaje PK
         nvarchar(255) Nombre
         nvarchar(255) Ciudad
         nvarchar(255) Pais
@@ -86,16 +86,16 @@ direction LR
     }
 
     HABITACION {
-        int ID_Habitacion PK
-        int Hospedaje_ID FK
+        bigint ID_Habitacion PK
+        bigint ID_Hospedaje FK
         nvarchar(255) Nombre
         nvarchar(MAX) Descripcion
         decimal Precio_Noche
     }
 
     EXCURSION {
-        int ID_Excursion PK
-        int Proveedor_ID FK
+        bigint ID_Excursion PK
+        bigint ID_Proveedor FK
         nvarchar(255) Nombre
         nvarchar(MAX) Descripcion
         nvarchar(50) Horario
@@ -105,12 +105,12 @@ direction LR
 
     SOLICITUD {
         bigint Nro_Solicitud PK
-        nvarchar(255) Cliente_Dni FK
+        bigint ID_Cliente FK
         bigint Agente_Legajo FK
         date Fecha_Solicitud
         date Fecha_Inicio_Tentativa
         date Fecha_Fin_Tentativa
-        int Cant_Pax
+        int Cant_Pasajeros
         nvarchar(MAX) Observaciones
         decimal Presupuesto_Estimado
     }
@@ -137,25 +137,29 @@ direction LR
         nvarchar(255) Estado
     }
 
-    DETALLE_PROPUESTA {
-        bigint ID_Detalle_Propuesta PK
+    PROPUESTA_VUELO {
+        bigint ID_Propuesta_Vuelo PK
         bigint Propuesta_Nro_Propuesta FK
-        bigint Vuelo_ID FK
-        int Habitacion_ID FK
-        int Vuelo_Cant_Pasajes
-        decimal Vuelo_Precio
-        decimal Vuelo_Subtotal
-        date Hospedaje_Fecha_Desde
-        date Hospedaje_Fecha_Hasta
-        int Hospedaje_Cant
-        decimal Hospedaje_Precio
-        decimal Hospedaje_Subtotal
+        bigint ID_Vuelo FK
+        int Cant_Pasajes
+        decimal Precio
+        decimal Subtotal
+    }
+
+    PROPUESTA_HOSPEDAJE {
+        bigint ID_Propuesta_Hospedaje PK
+        bigint Propuesta_Nro_Propuesta FK
+        int ID_Habitacion FK
+        date Fecha_Desde
+        date Fecha_Hasta
+        int Cantidad_Habitaciones
+        decimal Precio
+        decimal Subtotal
     }
 
     VENTA {
         bigint Nro_Venta PK
-        bigint Agencia_Nro_Agencia FK
-        nvarchar(255) Cliente_Dni FK
+        bigint ID_Cliente FK
         bigint Agente_Legajo FK
         bigint Propuesta_Nro_Propuesta FK
         date Fecha_Venta
@@ -166,37 +170,47 @@ direction LR
         decimal Importe_Total
     }
 
-    DETALLE_VENTA {
-        bigint ID_Detalle_Venta PK
+    VENTA_VUELO {
+        bigint ID_Venta_Vuelo PK
         bigint Venta_Nro_Venta FK
-        bigint Vuelo_ID FK
-        int Habitacion_ID FK
-        int Excursion_ID FK
-        int Vuelo_Cantidad_Pasajes
-        decimal Vuelo_Precio_Unitario
-        decimal Vuelo_Subtotal
-        nvarchar(255) Vuelo_Cod_Reserva
-        date Hospedaje_Fecha_Desde
-        date Hospedaje_Fecha_Hasta
-        int Hospedaje_Cantidad
-        decimal Hospedaje_Precio_Unitario
-        decimal Hospedaje_Subtotal
-        nvarchar(255) Hospedaje_Cod_Reserva
-        date Excursion_Fecha_Reserva
-        int Excursion_Cant
-        decimal Excursion_Precio_Unitario
-        decimal Excursion_Subtotal
-        nvarchar(255) Excursion_Cod_Reserva
+        bigint ID_Vuelo FK
+        int Cantidad_Pasajes
+        decimal Precio_Unitario
+        decimal Subtotal
+        nvarchar(255) Cod_Reserva
+    }
+
+    VENTA_HOSPEDAJE {
+        bigint ID_Venta_Hospedaje PK
+        bigint Venta_Nro_Venta FK
+        bigint ID_Habitacion FK
+        date Fecha_Desde
+        date Fecha_Hasta
+        int Cantidad_Habitaciones
+        decimal Precio_Unitario
+        decimal Subtotal
+        nvarchar(255) Cod_Reserva
+    }
+
+    VENTA_EXCURSION {
+        bigint ID_Venta_Excursion PK
+        bigint Venta_Nro_Venta FK
+        bigint ID_Excursion FK
+        date Fecha_Reserva
+        int Cantidad_Excursiones
+        decimal Precio_Unitario
+        decimal Subtotal
+        nvarchar(255) Cod_Reserva
     }
 
     ASPECTO {
-        int ID_Aspecto PK
+        bigint ID_Aspecto PK
         nvarchar(255) Descripcion
     }
 
     ENCUESTA {
         bigint Codigo_Encuesta PK
-        nvarchar(255) Cliente_Dni FK
+        bigint ID_Cliente FK
         bigint Agente_Legajo FK
         date Fecha_Encuesta
         nvarchar(MAX) Comentarios
@@ -204,12 +218,11 @@ direction LR
 
     DETALLE_ENCUESTA {
         bigint Encuesta_Codigo_Encuesta PK, FK
-        int Aspecto_ID PK, FK
+        bigint ID_Aspecto PK, FK
         int Puntaje
     }
 
     AGENCIA ||--o{ AGENTE : "emplea"
-    AGENCIA ||--o{ VENTA : "registra"
     AGENTE ||--o{ SOLICITUD : "gestiona"
     AGENTE ||--o{ PROPUESTA : "arma"
     AGENTE ||--o{ VENTA : "cierra"
@@ -224,14 +237,21 @@ direction LR
     HOSPEDAJE ||--o{ HABITACION : "tiene"
     SOLICITUD ||--o{ DETALLE_SOLICITUD : "contiene"
     SOLICITUD ||--o{ PROPUESTA : "deriva en"
-    PROPUESTA ||--o{ DETALLE_PROPUESTA : "incluye"
     PROPUESTA ||--o| VENTA : "puede efectivizarse en"
-    VENTA ||--o{ DETALLE_VENTA : "contiene"
     ENCUESTA ||--o{ DETALLE_ENCUESTA : "compuesta por"
     ASPECTO ||--o{ DETALLE_ENCUESTA : "es evaluado en"
-    VUELO ||--o{ DETALLE_PROPUESTA : "cotizado en"
-    HABITACION ||--o{ DETALLE_PROPUESTA : "cotizada en"
-    VUELO ||--o{ DETALLE_VENTA : "vendido en"
-    HABITACION ||--o{ DETALLE_VENTA : "vendida en"
-    EXCURSION ||--o{ DETALLE_VENTA : "vendida en"
+    
+    %% Relaciones de Propuesta
+    PROPUESTA ||--o{ PROPUESTA_VUELO : "incluye"
+    PROPUESTA ||--o{ PROPUESTA_HOSPEDAJE : "incluye"
+    VUELO ||--o{ PROPUESTA_VUELO : "cotizado en"
+    HABITACION ||--o{ PROPUESTA_HOSPEDAJE : "cotizada en"
+    
+    %% Relaciones de Venta
+    VENTA ||--o{ VENTA_VUELO : "contiene"
+    VENTA ||--o{ VENTA_HOSPEDAJE : "contiene"
+    VENTA ||--o{ VENTA_EXCURSION : "contiene"
+    VUELO ||--o{ VENTA_VUELO : "vendido en"
+    HABITACION ||--o{ VENTA_HOSPEDAJE : "vendida en"
+    EXCURSION ||--o{ VENTA_EXCURSION : "vendida en"
 ```
