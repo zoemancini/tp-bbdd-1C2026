@@ -192,3 +192,73 @@ create table [DB_LOPERS].Vuelo (
     foreign key (Aeropuerto_Llegada_Codigo) references [DB_LOPERS].Aeropuerto(Codigo)
 );
 go
+
+create table [DB_LOPERS].Solicitud (
+    Nro_Solicitud bigint primary key,
+    ID_Cliente bigint,
+    Agente_Legajo bigint,
+    Fecha_Solicitud date,
+    Fecha_Inicio_Tentativa date,
+    Fecha_Fin_Tentativa date,
+    Cant_Pasajeros int,
+    Observaciones nvarchar(MAX),
+    Presupuesto_Estimado decimal(18,2),
+    foreign key (ID_Cliente) references [DB_LOPERS].Cliente(ID_Cliente),
+    foreign key (Agente_Legajo) references [DB_LOPERS].Agente(Legajo)
+);
+go
+
+create table [DB_LOPERS].Detalle_Solicitud (
+    ID_Detalle_Solicitud bigint identity(1,1) primary key,
+    Solicitud_Nro_Solicitud bigint,
+    ID_Ciudad bigint,
+    Cant_Dias_Aprox int,
+    Observaciones nvarchar(MAX),
+    foreign key (Solicitud_Nro_Solicitud) references [DB_LOPERS].Solicitud(Nro_Solicitud),
+    foreign key (ID_Ciudad) references [DB_LOPERS].Ciudad(ID_Ciudad)
+);
+go
+
+create table [DB_LOPERS].Propuesta (
+    Nro_Propuesta bigint primary key, 
+    Solicitud_Nro_Solicitud bigint,
+    Agente_Legajo bigint,
+    ID_Estado_Propuesta bigint,
+    Fecha_Emision date,
+    Vigencia_Hasta date,
+    Fecha_Desde date,
+    Fecha_Hasta date,
+    Subtotal decimal(18,2),
+    Descuento decimal(18,2),
+    Importe_Total decimal(18,2),
+    foreign key (Solicitud_Nro_Solicitud) references [DB_LOPERS].Solicitud(Nro_Solicitud),
+    foreign key (Agente_Legajo) references [DB_LOPERS].Agente(Legajo),
+    foreign key (ID_Estado_Propuesta) references [DB_LOPERS].Estado_Propuesta(ID_Estado_Propuesta)
+);
+go
+
+create table [DB_LOPERS].Propuesta_Vuelo (
+    ID_Propuesta_Vuelo bigint identity(1,1) primary key,
+    Propuesta_Nro_Propuesta bigint,
+    ID_Vuelo bigint,
+    Cant_Pasajes int,
+    Precio decimal(18,2),
+    Subtotal decimal(18,2),
+    foreign key (Propuesta_Nro_Propuesta) references [DB_LOPERS].Propuesta(Nro_Propuesta),
+    foreign key (ID_Vuelo) references [DB_LOPERS].Vuelo(ID_Vuelo)
+);
+go
+
+create table [DB_LOPERS].Propuesta_Hospedaje (
+    ID_Propuesta_Hospedaje bigint identity(1,1) primary key,
+    Propuesta_Nro_Propuesta bigint,
+    ID_Habitacion bigint, 
+    Fecha_Desde date,
+    Fecha_Hasta date,
+    Cantidad_Habitaciones int,
+    Precio decimal(18,2),
+    Subtotal decimal(18,2),
+    foreign key (Propuesta_Nro_Propuesta) references [DB_LOPERS].Propuesta(Nro_Propuesta),
+    foreign key (ID_Habitacion) references [DB_LOPERS].Habitacion(ID_Habitacion)
+);
+go

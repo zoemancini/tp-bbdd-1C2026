@@ -151,7 +151,7 @@ direction LR
         bigint Nro_Propuesta PK
         bigint Solicitud_Nro_Solicitud FK
         bigint Agente_Legajo FK
-        bigint ID_Estado_Propuesta PK
+        bigint ID_Estado_Propuesta FK
         date Fecha_Emision
         date Vigencia_Hasta
         date Fecha_Desde
@@ -178,7 +178,7 @@ direction LR
     PROPUESTA_HOSPEDAJE {
         bigint ID_Propuesta_Hospedaje PK
         bigint Propuesta_Nro_Propuesta FK
-        int ID_Habitacion FK
+        bigint ID_Habitacion FK
         date Fecha_Desde
         date Fecha_Hasta
         int Cantidad_Habitaciones
