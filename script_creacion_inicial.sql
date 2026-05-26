@@ -2,7 +2,7 @@
 -- CREACIÓN DE ESQUEMA Y TABLAS
 -- ====================================================================================
 CREATE SCHEMA [DB_LOPERS]; 
-GO
+go
 
 -- ==========================================
 -- TABLAS DE DOMINIO
@@ -260,5 +260,94 @@ create table [DB_LOPERS].Propuesta_Hospedaje (
     Subtotal decimal(18,2),
     foreign key (Propuesta_Nro_Propuesta) references [DB_LOPERS].Propuesta(Nro_Propuesta),
     foreign key (ID_Habitacion) references [DB_LOPERS].Habitacion(ID_Habitacion)
+);
+go
+
+create table [DB_LOPERS].Venta (
+    Nro_Venta bigint primary key, 
+    ID_Cliente bigint,
+    Agente_Legajo bigint,
+    ID_Canal_Venta bigint,
+    ID_Medio_Pago bigint,
+    Fecha_Venta date,
+    Subtotal decimal(18,2),
+    Descuento decimal(18,2),
+    Importe_Total decimal(18,2),
+    foreign key (ID_Cliente) references [DB_LOPERS].Cliente(ID_Cliente),
+    foreign key (Agente_Legajo) references [DB_LOPERS].Agente(Legajo),
+    foreign key (ID_Canal_Venta) references [DB_LOPERS].Canal_Venta(ID_Canal_Venta),
+    foreign key (ID_Medio_Pago) references [DB_LOPERS].Medio_Pago(ID_Medio_Pago)
+);
+go
+
+create table [DB_LOPERS].Venta_Propuesta (
+    ID_Venta_Propuesta bigint identity(1,1) primary key,
+    Venta_Nro_Venta bigint,
+    Propuesta_Nro_Propuesta bigint,
+    foreign key (Venta_Nro_Venta) references [DB_LOPERS].Venta(Nro_Venta),
+    foreign key (Propuesta_Nro_Propuesta) references [DB_LOPERS].Propuesta(Nro_Propuesta)
+);
+go
+
+create table [DB_LOPERS].Venta_Vuelo (
+    ID_Venta_Vuelo bigint identity(1,1) primary key,
+    Venta_Nro_Venta bigint,
+    ID_Vuelo bigint,
+    Cantidad_Pasajes int,
+    Precio_Unitario decimal(18,2),
+    Subtotal decimal(18,2),
+    Cod_Reserva nvarchar(255),
+    foreign key (Venta_Nro_Venta) references [DB_LOPERS].Venta(Nro_Venta),
+    foreign key (ID_Vuelo) references [DB_LOPERS].Vuelo(ID_Vuelo)
+);
+go
+
+create table [DB_LOPERS].Venta_Hospedaje (
+    ID_Venta_Hospedaje bigint identity(1,1) primary key,
+    Venta_Nro_Venta bigint,
+    ID_Habitacion bigint,
+    Fecha_Desde date,
+    Fecha_Hasta date,
+    Cantidad_Habitaciones int,
+    Precio_Unitario decimal(18,2),
+    Subtotal decimal(18,2),
+    Cod_Reserva nvarchar(255),
+    foreign key (Venta_Nro_Venta) references [DB_LOPERS].Venta(Nro_Venta),
+    foreign key (ID_Habitacion) references [DB_LOPERS].Habitacion(ID_Habitacion)
+);
+go
+
+create table [DB_LOPERS].Venta_Excursion (
+    ID_Venta_Excursion bigint identity(1,1) primary key,
+    Venta_Nro_Venta bigint,
+    ID_Excursion bigint,
+    Fecha_Reserva date,
+    Cantidad_Excursiones int,
+    Precio_Unitario decimal(18,2),
+    Subtotal decimal(18,2),
+    Cod_Reserva nvarchar(255),
+    foreign key (Venta_Nro_Venta) references [DB_LOPERS].Venta(Nro_Venta),
+    foreign key (ID_Excursion) references [DB_LOPERS].Excursion(ID_Excursion)
+);
+go
+
+create table [DB_LOPERS].Encuesta (
+    Codigo_Encuesta bigint primary key, 
+    ID_Cliente bigint,
+    Agente_Legajo bigint,
+    Fecha_Encuesta date,
+    Comentarios nvarchar(MAX),
+    foreign key (ID_Cliente) references [DB_LOPERS].Cliente(ID_Cliente),
+    foreign key (Agente_Legajo) references [DB_LOPERS].Agente(Legajo)
+);
+go
+
+create table [DB_LOPERS].Detalle_Encuesta (
+    Encuesta_Codigo_Encuesta bigint,
+    ID_Aspecto bigint,
+    Puntaje int,
+    primary key (Encuesta_Codigo_Encuesta, ID_Aspecto),
+    foreign key (Encuesta_Codigo_Encuesta) references [DB_LOPERS].Encuesta(Codigo_Encuesta),
+    foreign key (ID_Aspecto) references [DB_LOPERS].Aspecto(ID_Aspecto)
 );
 go
