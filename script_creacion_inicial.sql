@@ -1,7 +1,7 @@
 -- ====================================================================================
 -- CREACIÓN DE ESQUEMA Y TABLAS
 -- ====================================================================================
-CREATE SCHEMA [DB_LOPERS]; 
+create schema [DB_LOPERS];
 go
 
 -- ==========================================
@@ -350,4 +350,126 @@ create table [DB_LOPERS].Detalle_Encuesta (
     foreign key (Encuesta_Codigo_Encuesta) references [DB_LOPERS].Encuesta(Codigo_Encuesta),
     foreign key (ID_Aspecto) references [DB_LOPERS].Aspecto(ID_Aspecto)
 );
+go
+
+-- ====================================================================================
+-- DML - STORED PROCEDURES DE MIGRACIÓN
+-- ====================================================================================
+create procedure [DB_LOPERS].Migrar_Provincia 
+as
+begin 
+    insert into [DB_LOPERS].Provincia (Nombre)
+
+    select distinct Agencia_Provincia
+    from gd_esquema.Maestra
+    where Agencia_Provincia is not null
+
+    union
+
+    select distinct Agente_Provincia
+    from gd_esquema.Maestra
+    where Agente_Provincia is not null
+
+    union
+
+    select distinct Cliente_Provincia 
+    from gd_esquema.Maestra
+    where Cliente_Provincia is not null;
+end
+go
+
+create procedure [DB_LOPERS].Migrar_Pais
+as
+begin
+    insert into [DB_LOPERS].Pais (Nombre)
+
+    select distinct Aeropuerto_Llegada_Pais
+    from gd_esquema.Maestra
+    where Aeropuerto_Llegada_Pais is not null
+
+    union
+
+    select distinct Aeropuerto_Salida_Pais
+    from gd_esquema.Maestra
+    where Aeropuerto_Salida_Pais is not null
+
+    union
+
+    select distinct Aerolinea_Pais
+    from gd_esquema.Maestra
+    where Aerolinea_Pais is not null
+
+    union 
+
+    select distinct Hospedaje_Pais
+    from gd_esquema.Maestra
+    where Hospedaje_Pais is not null;
+
+end
+go
+
+create procedure [DB_LOPERS].Migrar_Canal_Venta
+as 
+begin 
+    insert into [DB_LOPERS].Canal_Venta (Descripcion)
+
+    select distinct Venta_Canal_Venta
+    from gd_esquema.Maestra
+    where Venta_Canal_Venta is not null;
+end
+go
+
+create procedure [DB_LOPERS].Migrar_Medio_Pago
+as
+begin
+    insert into [DB_LOPERS].Medio_Pago (Descripcion)
+
+    select distinct Venta_Medio_Pago
+    from gd_esquema.Maestra
+    where Venta_Medio_Pago is not null;
+end
+go
+
+create procedure [DB_LOPERS].Migrar_Estado_Propuesta
+as
+begin
+    insert into [DB_LOPERS].Estado_Propuesta (Descripcion)
+
+    select distinct Propuesta_Estado
+    from gd_esquema.Maestra
+    where Propuesta_Estado is not null;
+end
+go
+
+create procedure [DB_LOPERS].Migrar_Alianza
+as
+begin
+    insert into [DB_LOPERS].Alianza (Nombre)
+
+    select distinct Aerolinea_Alianza
+    from gd_esquema.Maestra
+    where Aerolinea_Alianza is not null;
+end
+go
+
+create procedure [DB_LOPERS].Migrar_Aspecto
+as
+begin
+    insert into [DB_LOPERS].Aspecto (Descripcion)
+
+    select distinct Aspecto_Aspecto
+    from gd_esquema.Maestra
+    where Aspecto_Aspecto is not null;
+end
+go
+
+create procedure [DB_LOPERS].Migrar_Proveedor
+as
+begin
+    insert into [DB_LOPERS].Proveedor (Nombre, Mail, Telefono)
+
+    select distinct Proveedor_Nombre, Proveedor_Mail, Proveedor_Telefono
+    from gd_esquema.Maestra
+    where Proveedor_Nombre is not null;
+end
 go
