@@ -4,16 +4,16 @@ direction LR
 
     AGENCIA {
         bigint Nro_Agencia PK
+        bigint ID_Localidad FK
         nvarchar(255) Direccion
         nvarchar(255) Telefono
         nvarchar(255) Mail
-        nvarchar(255) Localidad
-        nvarchar(255) Provincia
     }
 
     AGENTE {
         bigint Legajo PK
         bigint Agencia_Nro_Agencia FK
+        bigint ID_Localidad FK
         nvarchar(255) Nombre
         nvarchar(255) Apellido
         nvarchar(255) Dni
@@ -21,12 +21,11 @@ direction LR
         nvarchar(255) Telefono
         nvarchar(255) Mail
         nvarchar(255) Direccion
-        nvarchar(255) Localidad
-        nvarchar(255) Provincia
     }
 
     CLIENTE {
         bigint ID_Cliente PK
+        bigint ID_Localidad FK
         nvarchar(255) Dni
         nvarchar(255) Nombre
         nvarchar(255) Apellido
@@ -34,8 +33,17 @@ direction LR
         nvarchar(255) Mail
         nvarchar(255) Direccion
         date Fecha_Nac
-        nvarchar(255) Localidad
-        nvarchar(255) Provincia
+    }
+
+    PROVINCIA {
+        bigint ID_Provincia PK
+        nvarchar(255) Nombre
+    }
+
+    LOCALIDAD {
+        bigint ID_Localidad PK
+        bigint ID_Provincia FK
+        nvarchar(255) Nombre
     }
 
     PROVEEDOR {
@@ -47,16 +55,43 @@ direction LR
 
     AEROPUERTO {
         nvarchar(10) Codigo PK
+        bigint ID_Pais FK
+        bigint ID_Ciudad FK
         nvarchar(200) Descripcion
-        nvarchar(255) Ciudad
-        nvarchar(255) Pais
     }
 
     AEROLINEA {
         nvarchar(255) Codigo PK
+        bigint ID_Alianza FK
+        bigint ID_Pais FK
         nvarchar(255) Nombre
-        nvarchar(255) Pais
-        nvarchar(255) Alianza
+    }
+
+    ALIANZA {
+        bigint ID_Alianza PK
+        nvarchar(255) Nombre
+    }
+
+    HOSPEDAJE {
+        bigint ID_Hospedaje PK
+        bigint ID_Pais FK
+        bigint ID_Ciudad FK
+        nvarchar(255) Nombre
+        nvarchar(255) Direccion
+        bit Incluye_Desayuno
+        nvarchar(50) Check_In
+        nvarchar(50) Check_Out
+    }
+
+    PAIS {
+        bigint ID_Pais PK
+        nvarchar(255) Nombre
+    }
+
+    CIUDAD {
+        bigint ID_Ciudad PK
+        bigint ID_Pais FK
+        nvarchar(255) Nombre
     }
 
     VUELO {
@@ -72,17 +107,6 @@ direction LR
         decimal Precio
         bit Incluye_Carry
         bit Incluye_Valija
-    }
-
-    HOSPEDAJE {
-        bigint ID_Hospedaje PK
-        nvarchar(255) Nombre
-        nvarchar(255) Ciudad
-        nvarchar(255) Pais
-        nvarchar(255) Direccion
-        bit Incluye_Desayuno
-        nvarchar(50) Check_In
-        nvarchar(50) Check_Out
     }
 
     HABITACION {
@@ -118,7 +142,7 @@ direction LR
     DETALLE_SOLICITUD {
         bigint ID_Detalle_Solicitud PK
         bigint Solicitud_Nro_Solicitud FK
-        nvarchar(255) Ciudad
+        bigint ID_Ciudad FK
         int Cant_Dias_Aprox
         nvarchar(MAX) Observaciones
     }
@@ -127,6 +151,7 @@ direction LR
         bigint Nro_Propuesta PK
         bigint Solicitud_Nro_Solicitud FK
         bigint Agente_Legajo FK
+        bigint ID_Estado_Propuesta FK
         date Fecha_Emision
         date Vigencia_Hasta
         date Fecha_Desde
@@ -134,7 +159,11 @@ direction LR
         decimal Subtotal
         decimal Descuento
         decimal Importe_Total
-        nvarchar(255) Estado
+    }
+
+    ESTADO_PROPUESTA {
+        bigint ID_Estado_Propuesta PK
+        nvarchar(255) Descripcion
     }
 
     PROPUESTA_VUELO {
@@ -149,7 +178,7 @@ direction LR
     PROPUESTA_HOSPEDAJE {
         bigint ID_Propuesta_Hospedaje PK
         bigint Propuesta_Nro_Propuesta FK
-        int ID_Habitacion FK
+        bigint ID_Habitacion FK
         date Fecha_Desde
         date Fecha_Hasta
         int Cantidad_Habitaciones
@@ -161,13 +190,28 @@ direction LR
         bigint Nro_Venta PK
         bigint ID_Cliente FK
         bigint Agente_Legajo FK
-        bigint Propuesta_Nro_Propuesta FK
+        bigint ID_Canal_Venta FK
+        bigint ID_Medio_Pago FK
         date Fecha_Venta
-        nvarchar(255) Canal_Venta
-        nvarchar(255) Medio_Pago
         decimal Subtotal
         decimal Descuento
         decimal Importe_Total
+    }
+
+    CANAL_VENTA {
+        bigint ID_Canal_Venta PK
+        nvarchar(255) Descripcion
+    }
+
+    MEDIO_PAGO {
+        bigint ID_Medio_Pago PK
+        nvarchar(255) Descripcion
+    }
+
+    VENTA_PROPUESTA {
+        bigint ID_Venta_Propuesta PK
+        bigint Venta_Nro_Venta FK
+        bigint Propuesta_Nro_Propuesta FK
     }
 
     VENTA_VUELO {
@@ -237,15 +281,18 @@ direction LR
     HOSPEDAJE ||--o{ HABITACION : "tiene"
     SOLICITUD ||--o{ DETALLE_SOLICITUD : "contiene"
     SOLICITUD ||--o{ PROPUESTA : "deriva en"
-    PROPUESTA ||--o| VENTA : "puede efectivizarse en"
     ENCUESTA ||--o{ DETALLE_ENCUESTA : "compuesta por"
     ASPECTO ||--o{ DETALLE_ENCUESTA : "es evaluado en"
+    ALIANZA ||--o{ AEROLINEA : "agrupa"
+    VENTA ||--o| VENTA_PROPUESTA : "se asocia en"
+    PROPUESTA ||--o| VENTA_PROPUESTA : "se asocia en"
     
     %% Relaciones de Propuesta
     PROPUESTA ||--o{ PROPUESTA_VUELO : "incluye"
     PROPUESTA ||--o{ PROPUESTA_HOSPEDAJE : "incluye"
     VUELO ||--o{ PROPUESTA_VUELO : "cotizado en"
     HABITACION ||--o{ PROPUESTA_HOSPEDAJE : "cotizada en"
+    ESTADO_PROPUESTA ||--o{ PROPUESTA : "describe"
     
     %% Relaciones de Venta
     VENTA ||--o{ VENTA_VUELO : "contiene"
@@ -254,4 +301,13 @@ direction LR
     VUELO ||--o{ VENTA_VUELO : "vendido en"
     HABITACION ||--o{ VENTA_HOSPEDAJE : "vendida en"
     EXCURSION ||--o{ VENTA_EXCURSION : "vendida en"
+
+    PROVINCIA ||--o{ LOCALIDAD : "tiene"
+    PAIS ||--o{ CIUDAD : "tiene"
+    LOCALIDAD ||--o{ AGENCIA : "ubica"
+    LOCALIDAD ||--o{ AGENTE : "ubica"
+    LOCALIDAD ||--o{ CLIENTE : "ubica"
+    CIUDAD ||--o{ DETALLE_SOLICITUD : "es destino de"
+    CANAL_VENTA ||--o{ VENTA : "procesa"
+    MEDIO_PAGO ||--o{ VENTA : "utiliza"
 ```

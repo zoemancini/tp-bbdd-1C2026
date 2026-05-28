@@ -71,7 +71,7 @@ create table [DB_LOPERS].Localidad (
 go
 
 create table [DB_LOPERS].Agencia (
-    Nro_Agencia bigint identity(1,1) primary key,
+    Nro_Agencia bigint primary key,
     ID_Localidad bigint,
     Direccion nvarchar(255),
     Telefono nvarchar(255),
@@ -473,3 +473,70 @@ begin
     where Proveedor_Nombre is not null;
 end
 go
+
+create procedure [DB_LOPERS].Migrar_Agencia
+as
+begin
+    insert into [DB_LOPERS].Agencia (Nro_Agencia, ID_Localidad, Direccion, Telefono, Mail)
+
+    select distinct 
+        m.Agencia_Nro_Agencia,
+        l.ID_Localidad,
+        m.Agencia_Direccion,
+        m.Agencia_Telefono,
+        m.Agencia_Mail
+    from gd_esquema.Maestra m
+    join [DB_LOPERS].Localidad l on m.Agencia_Localidad = l.Nombre
+    where m.Agencia_Nro_Agencia is not null;
+end
+go
+
+create procedure [DB_LOPERS].Migrar_Aeropuerto
+as
+begin 
+    insert into [DB_LOPERS].Aeropuerto (Codigo, ID_Pais, ID_Ciudad, Descripcion)
+
+    select distinct 
+        m.Aeropuerto_Salida_Codigo,
+        p.ID_Pais,
+        c.ID_Ciudad,
+        m.Aeropuerto_Salida_Descripcion
+    from gd_esquema.Maestra m
+    join [DB_LOPERS].Pais p on m.Aeropuerto_Salida_Pais = p.Nombre
+    join [DB_LOPERS].Ciudad c on m.Aeropuerto_Salida_Ciudad = c.Nombre
+    where m.Aeropuerto_Salida_Codigo is not null
+
+    union 
+
+    select distinct 
+        m.Aeropuerto_Llegada_Codigo,
+        p.ID_Pais,
+        c.ID_Ciudad,
+        m.Aeropuerto_Llegada_Descripcion
+    from gd_esquema.Maestra m
+    join [DB_LOPERS].Pais p on m.Aeropuerto_Llegada_Pais = p.Nombre
+    join [DB_LOPERS].Ciudad c on m.Aeropuerto_Llegada_Ciudad = c.Nombre
+    where m.Aeropuerto_Llegada_Codigo is not null;
+
+end
+go
+
+create procedure [DB_LOPERS].Migrar_Clientes
+as 
+begin 
+    insert into [DB_LOPERS].Cliente (ID_Localidad, Dni, Nombre, Apellido, Tel, Mail, Direccion, Fecha_Nac)
+
+    select distinct 
+        l.ID_Localidad,
+        m.Cliente_Dni,
+        m.Cliente_Nombre,
+        m.Cliente_Apellido,
+        m.Cliente_Tel,
+        m.Cliente_Mail,
+        m.Cliente_Direccion,
+        m.Cliente_Fecha_Nac
+    from gd_esquema.Maestra m
+    join [DB_LOPERS].Localidad l on Cliente_Localidad = l.Nombre
+end
+go
+
