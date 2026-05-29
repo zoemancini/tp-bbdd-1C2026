@@ -535,13 +535,6 @@ begin
 
     union
 
-    select distinct p.ID_Pais, m.Detalle_Solicitud_Ciudad 
-    from gd_esquema.Maestra m
-    left join [DB_LOPERS].Pais p on p.Nombre = 'Argentina'
-    where m.Detalle_Solicitud_Ciudad is not null
-
-    union
-
     select distinct p.ID_Pais, m.Aeropuerto_Salida_Ciudad
     from gd_esquema.Maestra m
     join [DB_LOPERS].Pais p on m.Aeropuerto_Salida_Pais = p.Nombre
