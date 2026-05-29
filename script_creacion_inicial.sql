@@ -352,6 +352,27 @@ create table [DB_LOPERS].Detalle_Encuesta (
 );
 go
 
+-- ==========================================
+-- CREACIÓN DE ÍNDICES (NON-CLUSTERED)
+-- ==========================================
+
+-- Índices para búsquedas frecuentes (Campos descriptivos importantes)
+CREATE NONCLUSTERED INDEX IX_Cliente_Dni ON [DB_LOPERS].Cliente(Dni);
+CREATE NONCLUSTERED INDEX IX_Agente_Dni ON [DB_LOPERS].Agente(Dni);
+CREATE NONCLUSTERED INDEX IX_Venta_Vuelo_CodReserva ON [DB_LOPERS].Venta_Vuelo(Cod_Reserva);
+CREATE NONCLUSTERED INDEX IX_Venta_Hospedaje_CodReserva ON [DB_LOPERS].Venta_Hospedaje(Cod_Reserva);
+CREATE NONCLUSTERED INDEX IX_Venta_Excursion_CodReserva ON [DB_LOPERS].Venta_Excursion(Cod_Reserva);
+
+-- Índices para Claves Foráneas Críticas (Para acelerar fuertemente los JOINs)
+CREATE NONCLUSTERED INDEX IX_Venta_Cliente ON [DB_LOPERS].Venta(ID_Cliente);
+CREATE NONCLUSTERED INDEX IX_Venta_Agente ON [DB_LOPERS].Venta(Agente_Legajo);
+CREATE NONCLUSTERED INDEX IX_Solicitud_Cliente ON [DB_LOPERS].Solicitud(ID_Cliente);
+CREATE NONCLUSTERED INDEX IX_Propuesta_Solicitud ON [DB_LOPERS].Propuesta(Solicitud_Nro_Solicitud);
+CREATE NONCLUSTERED INDEX IX_Propuesta_Agente ON [DB_LOPERS].Propuesta(Agente_Legajo);
+CREATE NONCLUSTERED INDEX IX_Encuesta_Cliente ON [DB_LOPERS].Encuesta(ID_Cliente);
+
+go
+
 -- ====================================================================================
 -- DML - STORED PROCEDURES DE MIGRACIÓN
 -- ====================================================================================
