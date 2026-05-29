@@ -858,3 +858,55 @@ begin
     where m.Encuesta_Codigo_Encuesta is not null and m.Aspecto_Aspecto is not null;
 end
 go
+
+-- ========================================================
+-- SCRIPT DE MIGRACIÓN DE DATOS (EJECUCIÓN DE SPs)
+-- ========================================================
+
+-- 1. TABLAS DE DOMINIO (No dependen de nadie)
+EXEC [DB_LOPERS].Migrar_Pais;
+EXEC [DB_LOPERS].Migrar_Provincia;
+EXEC [DB_LOPERS].Migrar_Canal_Venta;
+EXEC [DB_LOPERS].Migrar_Medio_Pago;
+EXEC [DB_LOPERS].Migrar_Estado_Propuesta;
+EXEC [DB_LOPERS].Migrar_Alianza;
+EXEC [DB_LOPERS].Migrar_Aspecto;
+EXEC [DB_LOPERS].Migrar_Proveedor;
+
+-- 2. TABLAS DEPENDIENTES NIVEL 1
+EXEC [DB_LOPERS].Migrar_Localidad;
+EXEC [DB_LOPERS].Migrar_Ciudad;
+
+-- 3. ENTIDADES PRINCIPALES Y CATÁLOGOS
+EXEC [DB_LOPERS].Migrar_Agencia;
+EXEC [DB_LOPERS].Migrar_Cliente;
+EXEC [DB_LOPERS].Migrar_Agente;
+EXEC [DB_LOPERS].Migrar_Aeropuerto;
+EXEC [DB_LOPERS].Migrar_Hospedaje;
+EXEC [DB_LOPERS].Migrar_Aerolinea;
+
+-- 4. SUB-ENTIDADES 
+EXEC [DB_LOPERS].Migrar_Habitacion;
+EXEC [DB_LOPERS].Migrar_Excursion;
+EXEC [DB_LOPERS].Migrar_Vuelo;
+
+-- 5. TRANSACCIONALES (Circuito de Negocio)
+EXEC [DB_LOPERS].Migrar_Solicitud;
+EXEC [DB_LOPERS].Migrar_Detalle_Solicitud;
+
+EXEC [DB_LOPERS].Migrar_Propuesta;
+EXEC [DB_LOPERS].Migrar_Propuesta_Vuelo;
+EXEC [DB_LOPERS].Migrar_Propuesta_Hospedaje;
+
+EXEC [DB_LOPERS].Migrar_Venta;
+EXEC [DB_LOPERS].Migrar_Venta_Propuesta;
+EXEC [DB_LOPERS].Migrar_Venta_Vuelo;
+EXEC [DB_LOPERS].Migrar_Venta_Hospedaje;
+EXEC [DB_LOPERS].Migrar_Venta_Excursion;
+
+-- 6. POST-VENTA
+EXEC [DB_LOPERS].Migrar_Encuesta;
+EXEC [DB_LOPERS].Migrar_Detalle_Encuesta;
+
+PRINT '¡MIGRACIÓN FINALIZADA CON ÉXITO!';
+GO
