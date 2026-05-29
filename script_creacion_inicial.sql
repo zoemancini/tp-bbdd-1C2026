@@ -474,34 +474,45 @@ begin
 end
 go
 
--- ==========================================
--- PROCEDIMIENTO: LOCALIDAD
--- ==========================================
-CREATE PROCEDURE [DB_LOPERS].Migrar_Localidad
-AS
-BEGIN
-    INSERT INTO [DB_LOPERS].Localidad (Nombre)
+create procedure [DB_LOPERS].Migrar_Localidad
+as
+begin
+    insert into [DB_LOPERS].Localidad (Nombre)
 
-    SELECT Cliente_Localidad FROM gd_esquema.Maestra WHERE Cliente_Localidad IS NOT NULL
-    UNION
-    SELECT Agente_Localidad FROM gd_esquema.Maestra WHERE Agente_Localidad IS NOT NULL
-    UNION
-    SELECT Agencia_Localidad FROM gd_esquema.Maestra WHERE Agencia_Localidad IS NOT NULL;
-END
-GO
--- ==========================================
--- PROCEDIMIENTO: CIUDAD
--- ==========================================
-CREATE PROCEDURE [DB_LOPERS].Migrar_Ciudad
-AS
-BEGIN
-    INSERT INTO [DB_LOPERS].Ciudad (Nombre)
+    select Cliente_Localidad 
+    from gd_esquema.Maestra 
+    where Cliente_Localidad is not null
 
-    SELECT Hospedaje_Ciudad FROM gd_esquema.Maestra WHERE Hospedaje_Ciudad IS NOT NULL
-    UNION
-    SELECT Detalle_Solicitud_Ciudad FROM gd_esquema.Maestra WHERE Detalle_Solicitud_Ciudad IS NOT NULL;
-END
-GO
+    union
+
+    select Agente_Localidad 
+    from gd_esquema.Maestra 
+    where Agente_Localidad is not null
+
+    union
+
+    select Agencia_Localidad 
+    from gd_esquema.Maestra 
+    where Agencia_Localidad is not null;
+end
+go
+
+create procedure [DB_LOPERS].Migrar_Ciudad
+as
+begin
+    insert into [DB_LOPERS].Ciudad (Nombre)
+
+    select Hospedaje_Ciudad 
+    from gd_esquema.Maestra 
+    where Hospedaje_Ciudad is not null
+
+    union
+
+    select Detalle_Solicitud_Ciudad 
+    from gd_esquema.Maestra 
+    where Detalle_Solicitud_Ciudad is not null;
+end
+go
 
 create procedure [DB_LOPERS].Migrar_Agencia
 as
@@ -612,20 +623,17 @@ begin
 end
 go
 
--- ==========================================
--- PROCEDIMIENTO: AEROLÍNEA
--- ==========================================
-CREATE PROCEDURE [DB_LOPERS].Migrar_Aerolinea
-AS
-BEGIN
-    INSERT INTO [DB_LOPERS].Aerolinea (Codigo)
+create procedure [DB_LOPERS].Migrar_Aerolinea
+as
+begin
+    insert into [DB_LOPERS].Aerolinea (Codigo)
 
-    SELECT DISTINCT
+    select distinct
         Aerolinea_Codigo
-    FROM gd_esquema.Maestra
-    WHERE Aerolinea_Codigo IS NOT NULL;
-END
-GO
+    from gd_esquema.Maestra
+    where Aerolinea_Codigo is not null;
+end
+go
 
 create procedure [DB_LOPERS].Migrar_Habitacion
 as
@@ -916,52 +924,45 @@ end
 go
 
 -- ========================================================
--- SCRIPT DE MIGRACIÓN DE DATOS (EJECUCIÓN DE SPs)
+-- SCRIPT DE MIGRACIÓN DE DATOS 
 -- ========================================================
+exec [DB_LOPERS].Migrar_Pais;
+exec [DB_LOPERS].Migrar_Provincia;
+exec [DB_LOPERS].Migrar_Canal_Venta;
+exec [DB_LOPERS].Migrar_Medio_Pago;
+exec [DB_LOPERS].Migrar_Estado_Propuesta;
+exec [DB_LOPERS].Migrar_Alianza;
+exec [DB_LOPERS].Migrar_Aspecto;
+exec [DB_LOPERS].Migrar_Proveedor;
 
--- 1. TABLAS DE DOMINIO (No dependen de nadie)
-EXEC [DB_LOPERS].Migrar_Pais;
-EXEC [DB_LOPERS].Migrar_Provincia;
-EXEC [DB_LOPERS].Migrar_Canal_Venta;
-EXEC [DB_LOPERS].Migrar_Medio_Pago;
-EXEC [DB_LOPERS].Migrar_Estado_Propuesta;
-EXEC [DB_LOPERS].Migrar_Alianza;
-EXEC [DB_LOPERS].Migrar_Aspecto;
-EXEC [DB_LOPERS].Migrar_Proveedor;
+exec [DB_LOPERS].Migrar_Localidad;
+exec [DB_LOPERS].Migrar_Ciudad;
 
--- 2. TABLAS DEPENDIENTES NIVEL 1
-EXEC [DB_LOPERS].Migrar_Localidad;
-EXEC [DB_LOPERS].Migrar_Ciudad;
+exec [DB_LOPERS].Migrar_Agencia;
+exec [DB_LOPERS].Migrar_Cliente;
+exec [DB_LOPERS].Migrar_Agente;
+exec [DB_LOPERS].Migrar_Aeropuerto;
+exec [DB_LOPERS].Migrar_Hospedaje;
+exec [DB_LOPERS].Migrar_Aerolinea;
 
--- 3. ENTIDADES PRINCIPALES Y CATÁLOGOS
-EXEC [DB_LOPERS].Migrar_Agencia;
-EXEC [DB_LOPERS].Migrar_Cliente;
-EXEC [DB_LOPERS].Migrar_Agente;
-EXEC [DB_LOPERS].Migrar_Aeropuerto;
-EXEC [DB_LOPERS].Migrar_Hospedaje;
-EXEC [DB_LOPERS].Migrar_Aerolinea;
+exec [DB_LOPERS].Migrar_Habitacion;
+exec [DB_LOPERS].Migrar_Excursion;
+exec [DB_LOPERS].Migrar_Vuelo;
 
--- 4. SUB-ENTIDADES 
-EXEC [DB_LOPERS].Migrar_Habitacion;
-EXEC [DB_LOPERS].Migrar_Excursion;
-EXEC [DB_LOPERS].Migrar_Vuelo;
+exec [DB_LOPERS].Migrar_Solicitud;
+exec [DB_LOPERS].Migrar_Detalle_Solicitud;
+exec [DB_LOPERS].Migrar_Propuesta;
+exec [DB_LOPERS].Migrar_Propuesta_Vuelo;
+exec [DB_LOPERS].Migrar_Propuesta_Hospedaje;
 
--- 5. TRANSACCIONALES (Circuito de Negocio)
-EXEC [DB_LOPERS].Migrar_Solicitud;
-EXEC [DB_LOPERS].Migrar_Detalle_Solicitud;
-EXEC [DB_LOPERS].Migrar_Propuesta;
-EXEC [DB_LOPERS].Migrar_Propuesta_Vuelo;
-EXEC [DB_LOPERS].Migrar_Propuesta_Hospedaje;
+exec [DB_LOPERS].Migrar_Venta;
+exec [DB_LOPERS].Migrar_Venta_Propuesta;
+exec [DB_LOPERS].Migrar_Venta_Vuelo;
+exec [DB_LOPERS].Migrar_Venta_Hospedaje;
+exec [DB_LOPERS].Migrar_Venta_Excursion;
 
-EXEC [DB_LOPERS].Migrar_Venta;
-EXEC [DB_LOPERS].Migrar_Venta_Propuesta;
-EXEC [DB_LOPERS].Migrar_Venta_Vuelo;
-EXEC [DB_LOPERS].Migrar_Venta_Hospedaje;
-EXEC [DB_LOPERS].Migrar_Venta_Excursion;
+exec [DB_LOPERS].Migrar_Encuesta;
+exec [DB_LOPERS].Migrar_Detalle_Encuesta;
 
--- 6. POST-VENTA
-EXEC [DB_LOPERS].Migrar_Encuesta;
-EXEC [DB_LOPERS].Migrar_Detalle_Encuesta;
-
-PRINT '¡MIGRACIÓN FINALIZADA CON ÉXITO!';
-GO
+print '¡MIGRACIÓN FINALIZADA CON ÉXITO!';
+go
