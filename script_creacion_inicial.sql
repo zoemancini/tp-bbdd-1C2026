@@ -671,7 +671,7 @@ begin
         m.Detalle_Solicitud_Observaciones
     from gd_esquema.Maestra m
     join [DB_LOPERS].Ciudad c on c.Nombre = m.Detalle_Solicitud_Ciudad
-    where m.Detalle_Solicitud_Ciudad is not null;
+    where m.Detalle_Solicitud_Ciudad is not null and m.Solicitud_Nro_Solicitud is not null;
 end 
 go
 
