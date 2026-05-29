@@ -1,3 +1,5 @@
+use GD1C2026;
+go
 -- ====================================================================================
 -- CREACIÓN DE ESQUEMA Y TABLAS
 -- ====================================================================================
@@ -498,40 +500,52 @@ go
 create procedure [DB_LOPERS].Migrar_Localidad
 as
 begin
-    insert into [DB_LOPERS].Localidad (Nombre)
-
-    select Cliente_Localidad 
-    from gd_esquema.Maestra 
-    where Cliente_Localidad is not null
-
-    union
-
-    select Agente_Localidad 
-    from gd_esquema.Maestra 
-    where Agente_Localidad is not null
+    insert into [DB_LOPERS].Localidad (ID_Provincia, Nombre)
+    
+    select distinct p.ID_Provincia, m.Cliente_Localidad 
+    from gd_esquema.Maestra m
+    join [DB_LOPERS].Provincia p on m.Cliente_Provincia = p.Nombre
+    where m.Cliente_Localidad is not null
 
     union
 
-    select Agencia_Localidad 
-    from gd_esquema.Maestra 
-    where Agencia_Localidad is not null;
+    select distinct p.ID_Provincia, m.Agente_Localidad 
+    from gd_esquema.Maestra m
+    join [DB_LOPERS].Provincia p on m.Agente_Provincia = p.Nombre
+    where m.Agente_Localidad is not null
+
+    union
+
+    select distinct p.ID_Provincia, m.Agencia_Localidad 
+    from gd_esquema.Maestra m
+    join [DB_LOPERS].Provincia p on m.Agencia_Provincia = p.Nombre
+    where m.Agencia_Localidad is not null;
 end
 go
 
 create procedure [DB_LOPERS].Migrar_Ciudad
 as
 begin
-    insert into [DB_LOPERS].Ciudad (Nombre)
+    insert into [DB_LOPERS].Ciudad (ID_Pais, Nombre)
 
-    select Hospedaje_Ciudad 
-    from gd_esquema.Maestra 
-    where Hospedaje_Ciudad is not null
+    select distinct p.ID_Pais, m.Hospedaje_Ciudad 
+    from gd_esquema.Maestra m
+    join [DB_LOPERS].Pais p on m.Hospedaje_Pais = p.Nombre
+    where m.Hospedaje_Ciudad is not null
 
     union
 
-    select Detalle_Solicitud_Ciudad 
-    from gd_esquema.Maestra 
-    where Detalle_Solicitud_Ciudad is not null;
+    select distinct p.ID_Pais, m.Aeropuerto_Salida_Ciudad
+    from gd_esquema.Maestra m
+    join [DB_LOPERS].Pais p on m.Aeropuerto_Salida_Pais = p.Nombre
+    where m.Aeropuerto_Salida_Ciudad is not null
+
+    union
+
+    select distinct p.ID_Pais, m.Aeropuerto_Llegada_Ciudad
+    from gd_esquema.Maestra m
+    join [DB_LOPERS].Pais p on m.Aeropuerto_Llegada_Pais = p.Nombre
+    where m.Aeropuerto_Llegada_Ciudad is not null;
 end
 go
 
@@ -554,31 +568,31 @@ go
 
 create procedure [DB_LOPERS].Migrar_Aeropuerto
 as
-begin 
+begin
     insert into [DB_LOPERS].Aeropuerto (Codigo, ID_Pais, ID_Ciudad, Descripcion)
-
-    select distinct 
+    select 
         m.Aeropuerto_Salida_Codigo,
-        p.ID_Pais,
-        c.ID_Ciudad,
-        m.Aeropuerto_Salida_Descripcion
+        max(p.ID_Pais),
+        max(c.ID_Ciudad),
+        max(m.Aeropuerto_Salida_Descripcion)
     from gd_esquema.Maestra m
     join [DB_LOPERS].Pais p on m.Aeropuerto_Salida_Pais = p.Nombre
     join [DB_LOPERS].Ciudad c on m.Aeropuerto_Salida_Ciudad = c.Nombre
     where m.Aeropuerto_Salida_Codigo is not null
+    group by m.Aeropuerto_Salida_Codigo;
 
-    union 
-
-    select distinct 
+    insert into [DB_LOPERS].Aeropuerto (Codigo, ID_Pais, ID_Ciudad, Descripcion)
+    select 
         m.Aeropuerto_Llegada_Codigo,
-        p.ID_Pais,
-        c.ID_Ciudad,
-        m.Aeropuerto_Llegada_Descripcion
+        max(p.ID_Pais),
+        max(c.ID_Ciudad),
+        max(m.Aeropuerto_Llegada_Descripcion)
     from gd_esquema.Maestra m
     join [DB_LOPERS].Pais p on m.Aeropuerto_Llegada_Pais = p.Nombre
     join [DB_LOPERS].Ciudad c on m.Aeropuerto_Llegada_Ciudad = c.Nombre
-    where m.Aeropuerto_Llegada_Codigo is not null;
-
+    where m.Aeropuerto_Llegada_Codigo is not null
+      and not exists (select 1 from [DB_LOPERS].Aeropuerto a where a.Codigo = m.Aeropuerto_Llegada_Codigo)
+    group by m.Aeropuerto_Llegada_Codigo;
 end
 go
 
@@ -647,12 +661,17 @@ go
 create procedure [DB_LOPERS].Migrar_Aerolinea
 as
 begin
-    insert into [DB_LOPERS].Aerolinea (Codigo)
+    insert into [DB_LOPERS].Aerolinea (Codigo, ID_Alianza, ID_Pais, Nombre)
 
     select distinct
-        Aerolinea_Codigo
-    from gd_esquema.Maestra
-    where Aerolinea_Codigo is not null;
+        m.Aerolinea_Codigo,
+        al.ID_Alianza,
+        p.ID_Pais,
+        m.Aerolinea_Nombre
+    from gd_esquema.Maestra m
+    left join [DB_LOPERS].Alianza al on m.Aerolinea_Alianza = al.Nombre
+    left join [DB_LOPERS].Pais p on m.Aerolinea_Pais = p.Nombre
+    where m.Aerolinea_Codigo is not null;
 end
 go
 
@@ -660,15 +679,14 @@ create procedure [DB_LOPERS].Migrar_Habitacion
 as
 begin
     insert into [DB_LOPERS].Habitacion (ID_Hospedaje, Nombre, Descripcion, Precio_Noche)
-
     select distinct
-        h.ID_Hospedaje,
+        ho.ID_Hospedaje,
         m.Habitacion_Nombre,
         m.Habitacion_Descripcion,
         m.Habitacion_Precio_Noche
     from gd_esquema.Maestra m
-    join [DB_LOPERS].Hospedaje h on h.Nombre = m.Habitacion_Nombre and h.Direccion = m.Hospedaje_Direccion
-    where m.Habitacion_Nombre is not null; 
+    join [DB_LOPERS].Hospedaje ho on ho.Nombre = m.Hospedaje_Nombre AND ho.Direccion = m.Hospedaje_Direccion
+    where m.Habitacion_Nombre is not null;
 end
 go
 
