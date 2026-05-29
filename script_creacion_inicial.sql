@@ -474,20 +474,49 @@ begin
 end
 go
 
+-- ==========================================
+-- PROCEDIMIENTO: LOCALIDAD
+-- ==========================================
+CREATE PROCEDURE [DB_LOPERS].Migrar_Localidad
+AS
+BEGIN
+    INSERT INTO [DB_LOPERS].Localidad (Nombre)
+
+    SELECT Cliente_Localidad FROM gd_esquema.Maestra WHERE Cliente_Localidad IS NOT NULL
+    UNION
+    SELECT Agente_Localidad FROM gd_esquema.Maestra WHERE Agente_Localidad IS NOT NULL
+    UNION
+    SELECT Agencia_Localidad FROM gd_esquema.Maestra WHERE Agencia_Localidad IS NOT NULL;
+END
+GO
+-- ==========================================
+-- PROCEDIMIENTO: CIUDAD
+-- ==========================================
+CREATE PROCEDURE [DB_LOPERS].Migrar_Ciudad
+AS
+BEGIN
+    INSERT INTO [DB_LOPERS].Ciudad (Nombre)
+
+    SELECT Hospedaje_Ciudad FROM gd_esquema.Maestra WHERE Hospedaje_Ciudad IS NOT NULL
+    UNION
+    SELECT Detalle_Solicitud_Ciudad FROM gd_esquema.Maestra WHERE Detalle_Solicitud_Ciudad IS NOT NULL;
+END
+GO
+
 create procedure [DB_LOPERS].Migrar_Agencia
 as
 begin
     insert into [DB_LOPERS].Agencia (Nro_Agencia, ID_Localidad, Direccion, Telefono, Mail)
-
-    select distinct 
+    select
         m.Agencia_Nro_Agencia,
-        l.ID_Localidad,
-        m.Agencia_Direccion,
-        m.Agencia_Telefono,
-        m.Agencia_Mail
+        max(l.ID_Localidad),
+        max(m.Agencia_Direccion),
+        max(m.Agencia_Telefono),
+        max(m.Agencia_Mail)
     from gd_esquema.Maestra m
     join [DB_LOPERS].Localidad l on m.Agencia_Localidad = l.Nombre
-    where m.Agencia_Nro_Agencia is not null;
+    where m.Agencia_Nro_Agencia is not null
+    group by m.Agencia_Nro_Agencia;
 end
 go
 
@@ -521,22 +550,23 @@ begin
 end
 go
 
-create procedure [DB_LOPERS].Migrar_Clientes
-as 
-begin 
+create procedure [DB_LOPERS].Migrar_Cliente
+as
+begin
     insert into [DB_LOPERS].Cliente (ID_Localidad, Dni, Nombre, Apellido, Tel, Mail, Direccion, Fecha_Nac)
-
-    select distinct 
-        l.ID_Localidad,
+    select
+        max(l.ID_Localidad),
         m.Cliente_Dni,
-        m.Cliente_Nombre,
-        m.Cliente_Apellido,
-        m.Cliente_Tel,
-        m.Cliente_Mail,
-        m.Cliente_Direccion,
-        m.Cliente_Fecha_Nac
+        max(m.Cliente_Nombre),
+        max(m.Cliente_Apellido),
+        max(m.Cliente_Tel),
+        max(m.Cliente_Mail),
+        max(m.Cliente_Direccion),
+        max(m.Cliente_Fecha_Nac)
     from gd_esquema.Maestra m
     join [DB_LOPERS].Localidad l on Cliente_Localidad = l.Nombre
+    where m.Cliente_Dni is not null
+    group by m.Cliente_Dni;
 end
 go
 
@@ -544,21 +574,21 @@ create procedure [DB_LOPERS].Migrar_Agente
 as
 begin
     insert into [DB_LOPERS].Agente (Legajo, Agencia_Nro_Agencia, ID_Localidad, Nombre, Apellido, Dni, Fecha_Nac, Telefono, Mail, Direccion)
-
-    select distinct 
+    select
         m.Agente_Legajo,
-        m.Agencia_Nro_Agencia,
-        l.ID_Localidad,
-        m.Agente_Nombre,
-        m.Agente_Apellido,
-        m.Agente_Dni,
-        m.Agente_Fecha_Nac,
-        m.Agente_Telefono,
-        m.Agente_Mail,
-        m.Agente_Direccion
-    from gd_esquema.Maestra m 
+        max(m.Agencia_Nro_Agencia),
+        max(l.ID_Localidad),
+        max(m.Agente_Nombre),
+        max(m.Agente_Apellido),
+        max(m.Agente_Dni),
+        max(m.Agente_Fecha_Nac),
+        max(m.Agente_Telefono),
+        max(m.Agente_Mail),
+        max(m.Agente_Direccion)
+    from gd_esquema.Maestra m
     join [DB_LOPERS].Localidad l on l.Nombre = m.Agente_Localidad
-    where m.Agente_Legajo is not null;
+    where m.Agente_Legajo is not null
+    group by m.Agente_Legajo;
 end
 go
 
@@ -581,6 +611,21 @@ begin
     where m.Hospedaje_Nombre is not null;
 end
 go
+
+-- ==========================================
+-- PROCEDIMIENTO: AEROLÍNEA
+-- ==========================================
+CREATE PROCEDURE [DB_LOPERS].Migrar_Aerolinea
+AS
+BEGIN
+    INSERT INTO [DB_LOPERS].Aerolinea (Codigo)
+
+    SELECT DISTINCT
+        Aerolinea_Codigo
+    FROM gd_esquema.Maestra
+    WHERE Aerolinea_Codigo IS NOT NULL;
+END
+GO
 
 create procedure [DB_LOPERS].Migrar_Habitacion
 as
@@ -640,22 +685,22 @@ go
 
 create procedure [DB_LOPERS].Migrar_Solicitud
 as
-begin 
+begin
     insert into [DB_LOPERS].Solicitud (Nro_Solicitud, ID_Cliente, Agente_Legajo, Fecha_Solicitud, Fecha_Inicio_Tentativa, Fecha_Fin_Tentativa, Cant_Pasajeros, Observaciones, Presupuesto_Estimado)
-
-    select distinct 
+    select
         m.Solicitud_Nro_Solicitud,
-        c.ID_Cliente,
-        m.Agente_Legajo,
-        m.Solicitud_Fecha_Solicitud,
-        m.Solicitud_Fecha_Inicio_Tentativa,
-        m.Solicitud_Fecha_Fin_Tentativa,
-        m.Solicitud_Cant_Pax,
-        m.Solicitud_Observaciones,
-        m.Solicitud_Presupuesto_Estimado
+        max(c.ID_Cliente),
+        max(m.Agente_Legajo),
+        max(m.Solicitud_Fecha_Solicitud),
+        max(m.Solicitud_Fecha_Inicio_Tentativa),
+        max(m.Solicitud_Fecha_Fin_Tentativa),
+        max(m.Solicitud_Cant_Pax),
+        max(m.Solicitud_Observaciones),
+        max(m.Solicitud_Presupuesto_Estimado)
     from gd_esquema.Maestra m
     join [DB_LOPERS].Cliente c on c.Dni = m.Cliente_Dni
-    where m.Solicitud_Nro_Solicitud is not null;
+    where m.Solicitud_Nro_Solicitud is not null
+    group by m.Solicitud_Nro_Solicitud;
 end
 go
 
@@ -676,25 +721,26 @@ end
 go
 
 
-create procedure [DB_LOPERS].Migrar_Estado_Propuesta
+create procedure [DB_LOPERS].Migrar_Propuesta
 as
 begin
     insert into [DB_LOPERS].Propuesta (Nro_Propuesta, Solicitud_Nro_Solicitud, Agente_Legajo, ID_Estado_Propuesta, Fecha_Emision, Vigencia_Hasta, Fecha_Desde, Fecha_Hasta, Subtotal, Descuento, Importe_Total)
-    select distinct
+    select
         m.Propuesta_Nro_Propuesta,
-        m.Solicitud_Nro_Solicitud, 
-        m.Agente_Legajo, 
-        ep.ID_Estado_Propuesta, 
-        m.Propuesta_Fecha_Emision, 
-        m.Propuesta_Vigencia_Hasta, 
-        m.Propuesta_Fecha_Desde, 
-        m.Propuesta_Fecha_Hasta, 
-        m.Propuesta_Subtotal, 
-        m.Propuesta_Descuento, 
-        m.Propuesta_Importe_Total
+        max(m.Solicitud_Nro_Solicitud),
+        max(m.Agente_Legajo),
+        max(ep.ID_Estado_Propuesta),
+        max(m.Propuesta_Fecha_Emision),
+        max(m.Propuesta_Vigencia_Hasta),
+        max(m.Propuesta_Fecha_Desde),
+        max(m.Propuesta_Fecha_Hasta),
+        max(m.Propuesta_Subtotal),
+        max(m.Propuesta_Descuento),
+        max(m.Propuesta_Importe_Total)
     from gd_esquema.Maestra m
     join [DB_LOPERS].Estado_Propuesta ep on m.Propuesta_Estado = ep.Descripcion
-    where m.Propuesta_Nro_Propuesta is not null;
+    where m.Propuesta_Nro_Propuesta is not null
+    group by m.Propuesta_Nro_Propuesta;
 end
 go
 
@@ -713,6 +759,8 @@ begin
         and m.Aeropuerto_Salida_Codigo = v.Aeropuerto_Salida_Codigo 
         and m.Aeropuerto_Llegada_Codigo = v.Aeropuerto_Llegada_Codigo 
         and m.Vuelo_Fecha_Salida = v.Fecha_Salida
+        and m.Vuelo_Fecha_Llegada = v.Fecha_Llegada
+        and m.Vuelo_Precio = v.Precio
     where m.Propuesta_Nro_Propuesta is not null and m.Detalle_Propuesta_Vuelo_Precio is not null;
 end
 go
@@ -740,21 +788,22 @@ create procedure [DB_LOPERS].Migrar_Venta
 as
 begin
     insert into [DB_LOPERS].Venta (Nro_Venta, ID_Cliente, Agente_Legajo, ID_Canal_Venta, ID_Medio_Pago, Fecha_Venta, Subtotal, Descuento, Importe_Total)
-    select distinct 
-        m.Venta_Nro_Venta, 
-        c.ID_Cliente, 
-        m.Agente_Legajo, 
-        cv.ID_Canal_Venta, 
-        mp.ID_Medio_Pago, 
-        m.Venta_Fecha_Venta, 
-        m.Venta_Subtotal, 
-        m.Venta_Descuento, 
-        m.Venta_Importe_Total
+    select
+        m.Venta_Nro_Venta,
+        max(c.ID_Cliente),
+        max(m.Agente_Legajo),
+        max(cv.ID_Canal_Venta),
+        max(mp.ID_Medio_Pago),
+        max(m.Venta_Fecha_Venta),
+        max(m.Venta_Subtotal),
+        max(m.Venta_Descuento),
+        max(m.Venta_Importe_Total)
     from gd_esquema.Maestra m
     join [DB_LOPERS].Cliente c on m.Cliente_Dni = c.Dni
     join [DB_LOPERS].Canal_Venta cv on m.Venta_Canal_Venta = cv.Descripcion
     join [DB_LOPERS].Medio_Pago mp on m.Venta_Medio_Pago = mp.Descripcion
-    where m.Venta_Nro_Venta is not null;
+    where m.Venta_Nro_Venta is not null
+    group by m.Venta_Nro_Venta;
 end
 go
 
@@ -786,6 +835,8 @@ begin
         and m.Aeropuerto_Salida_Codigo = v.Aeropuerto_Salida_Codigo 
         and m.Aeropuerto_Llegada_Codigo = v.Aeropuerto_Llegada_Codigo 
         and m.Vuelo_Fecha_Salida = v.Fecha_Salida
+        and m.Vuelo_Fecha_Llegada = v.Fecha_Llegada
+        and m.Vuelo_Precio = v.Precio
     where m.Venta_Nro_Venta is not null and m.Detalle_Venta_Vuelo_Precio_Unitario is not null;
 end
 go
@@ -824,7 +875,11 @@ begin
         m.Detalle_Venta_Excursion_Cod_Reserva
     from gd_esquema.Maestra m
     join [DB_LOPERS].Proveedor p on m.Proveedor_Nombre = p.Nombre
-    join [DB_LOPERS].Excursion e on m.Excursion_Nombre = e.Nombre and m.Excursion_Horario = e.Horario and p.ID_Proveedor = e.ID_Proveedor
+    join [DB_LOPERS].Excursion e on m.Excursion_Nombre = e.Nombre
+        and m.Excursion_Horario = e.Horario
+        and p.ID_Proveedor = e.ID_Proveedor
+        and m.Excursion_Duracion = e.Duracion
+        and m.Excursion_Precio = e.Precio
     where m.Venta_Nro_Venta is not null and m.Detalle_Venta_Excursion_Precio_Unitario is not null;
 end
 go
@@ -833,15 +888,16 @@ create procedure [DB_LOPERS].Migrar_Encuesta
 as
 begin
     insert into [DB_LOPERS].Encuesta (Codigo_Encuesta, ID_Cliente, Agente_Legajo, Fecha_Encuesta, Comentarios)
-    select distinct 
-        m.Encuesta_Codigo_Encuesta, 
-        c.ID_Cliente, 
-        m.Agente_Legajo, 
-        m.Encuesta_Fecha_Encuesta, 
-        m.Encuesta_Comentarios
+    select
+        m.Encuesta_Codigo_Encuesta,
+        max(c.ID_Cliente),
+        max(m.Agente_Legajo),
+        max(m.Encuesta_Fecha_Encuesta),
+        max(m.Encuesta_Comentarios)
     from gd_esquema.Maestra m
     join [DB_LOPERS].Cliente c on m.Cliente_Dni = c.Dni
-    where m.Encuesta_Codigo_Encuesta is not null;
+    where m.Encuesta_Codigo_Encuesta is not null
+    group by m.Encuesta_Codigo_Encuesta;
 end
 go
 
@@ -893,7 +949,6 @@ EXEC [DB_LOPERS].Migrar_Vuelo;
 -- 5. TRANSACCIONALES (Circuito de Negocio)
 EXEC [DB_LOPERS].Migrar_Solicitud;
 EXEC [DB_LOPERS].Migrar_Detalle_Solicitud;
-
 EXEC [DB_LOPERS].Migrar_Propuesta;
 EXEC [DB_LOPERS].Migrar_Propuesta_Vuelo;
 EXEC [DB_LOPERS].Migrar_Propuesta_Hospedaje;
