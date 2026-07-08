@@ -5,7 +5,7 @@ GO
 -- SCRIPTS DE ELIMINACION PARA PODER CORRER TODO DE CERO
 -- ====================================================================================
 
--- Eliminación de Vistas Analíticas
+
 IF OBJECT_ID('[DB_LOPERS].[v_satisfaccion_promedio_por_agente]', 'V') IS NOT NULL DROP VIEW [DB_LOPERS].[v_satisfaccion_promedio_por_agente];
 IF OBJECT_ID('[DB_LOPERS].[v_ranking_aspectos_valorados]', 'V') IS NOT NULL DROP VIEW [DB_LOPERS].[v_ranking_aspectos_valorados];
 IF OBJECT_ID('[DB_LOPERS].[v_desvio_presupuesto]', 'V') IS NOT NULL DROP VIEW [DB_LOPERS].[v_desvio_presupuesto];
@@ -17,16 +17,16 @@ IF OBJECT_ID('[DB_LOPERS].[v_ranking_solicitudes_por_temporada]', 'V') IS NOT NU
 IF OBJECT_ID('[DB_LOPERS].[v_distribucion_facturacion_cuatrimestral]', 'V') IS NOT NULL DROP VIEW [DB_LOPERS].[v_distribucion_facturacion_cuatrimestral];
 IF OBJECT_ID('[DB_LOPERS].[v_ticket_promedio_mensual]', 'V') IS NOT NULL DROP VIEW [DB_LOPERS].[v_ticket_promedio_mensual];
 
--- Eliminación de Procedimientos de Migración BI
+
 IF OBJECT_ID('[DB_LOPERS].[Migrar_Modelo_BI]', 'P') IS NOT NULL DROP PROCEDURE [DB_LOPERS].[Migrar_Modelo_BI];
 
--- Eliminación de Tablas de Hechos
+
 IF OBJECT_ID('[DB_LOPERS].[BI_Hecho_Encuesta]', 'U') IS NOT NULL DROP TABLE [DB_LOPERS].[BI_Hecho_Encuesta];
 IF OBJECT_ID('[DB_LOPERS].[BI_Hecho_Propuesta]', 'U') IS NOT NULL DROP TABLE [DB_LOPERS].[BI_Hecho_Propuesta];
 IF OBJECT_ID('[DB_LOPERS].[BI_Hecho_Solicitud]', 'U') IS NOT NULL DROP TABLE [DB_LOPERS].[BI_Hecho_Solicitud];
 IF OBJECT_ID('[DB_LOPERS].[BI_Hecho_Venta]', 'U') IS NOT NULL DROP TABLE [DB_LOPERS].[BI_Hecho_Venta];
 
--- Eliminación de Tablas de Dimensiones
+
 IF OBJECT_ID('[DB_LOPERS].[BI_Aspecto]', 'U') IS NOT NULL DROP TABLE [DB_LOPERS].[BI_Aspecto];
 IF OBJECT_ID('[DB_LOPERS].[BI_Estado_Propuesta]', 'U') IS NOT NULL DROP TABLE [DB_LOPERS].[BI_Estado_Propuesta];
 IF OBJECT_ID('[DB_LOPERS].[BI_Canal_Venta]', 'U') IS NOT NULL DROP TABLE [DB_LOPERS].[BI_Canal_Venta];
@@ -92,7 +92,7 @@ GO
 -- CREACIÓN DE TABLAS DE HECHOS
 -- ====================================================================================
 
--- Hecho Ventas
+
 CREATE TABLE [DB_LOPERS].[BI_Hecho_Venta] (
     ID_Rango_Etario_Cliente int NOT NULL,
     ID_Rango_Etario_Agente int NOT NULL,
@@ -100,7 +100,7 @@ CREATE TABLE [DB_LOPERS].[BI_Hecho_Venta] (
     ID_Tiempo bigint NOT NULL,
     ID_Tipo_Servicio bigint NOT NULL,
     
-    -- Métricas pre-calculadas
+    
     Cant_Ventas int NOT NULL,
     Suma_Facturacion decimal(18,2) NOT NULL,
 
@@ -113,13 +113,12 @@ CREATE TABLE [DB_LOPERS].[BI_Hecho_Venta] (
 );
 GO
 
--- Hecho Solicitudes
+
 CREATE TABLE [DB_LOPERS].[BI_Hecho_Solicitud] (
     ID_Rango_Etario_Cliente int NOT NULL,
     ID_Rango_Etario_Agente int NOT NULL,
     ID_Tiempo_Solicitud bigint NOT NULL,
     
-    -- Métricas pre-calculadas
     Cant_Solicitudes int NOT NULL,
     Suma_Anticipacion_Dias int NOT NULL,
     Prom_Anticipacion_Dias decimal(18,2) NOT NULL,
@@ -132,7 +131,7 @@ CREATE TABLE [DB_LOPERS].[BI_Hecho_Solicitud] (
 );
 GO
 
--- Hecho Propuestas
+
 CREATE TABLE [DB_LOPERS].[BI_Hecho_Propuesta] (
     ID_Rango_Etario_Agente int NOT NULL,
     ID_Estado_Propuesta bigint NOT NULL,
@@ -140,7 +139,6 @@ CREATE TABLE [DB_LOPERS].[BI_Hecho_Propuesta] (
     ID_Tiempo_Solicitud bigint NOT NULL,
     ID_Tiempo_Viaje_Inicio bigint NOT NULL,
     
-    -- Métricas pre-calculadas
     Cant_Propuestas int NOT NULL,
     Cant_Aceptadas int NOT NULL,
     Suma_Cotizacion decimal(18,2) NOT NULL,
@@ -159,14 +157,13 @@ CREATE TABLE [DB_LOPERS].[BI_Hecho_Propuesta] (
 );
 GO
 
--- Hecho Encuestas
+
 CREATE TABLE [DB_LOPERS].[BI_Hecho_Encuesta] (
     ID_Rango_Etario_Cliente int NOT NULL,
     ID_Rango_Etario_Agente int NOT NULL,
     ID_Tiempo bigint NOT NULL,
     ID_Aspecto bigint NOT NULL,
     
-    -- Métricas pre-calculadas
     Cant_Encuestas int NOT NULL,
     Suma_Puntaje int NOT NULL,
     Prom_Puntaje decimal(18,2) NOT NULL,
@@ -188,9 +185,7 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
-    -- A. Población de la Dimensiones
     
-    -- Dimension Tiempo
     DECLARE @MinDate DATE, @MaxDate DATE;
     SELECT @MinDate = MIN(MinF), @MaxDate = MAX(MaxF)
     FROM (
@@ -227,7 +222,6 @@ BEGIN
         SET @MinDate = DATEADD(day, 1, @MinDate);
     END;
 
-    -- Dimensión Rango Etario Cliente
     INSERT INTO [DB_LOPERS].BI_Rango_Etario_Cliente (Descripcion)
     VALUES 
         ('Menores de 25 años inclusive'),
@@ -235,35 +229,32 @@ BEGIN
         ('Entre 35 y 50 años inclusive'),
         ('Mayores de 50 años');
 
-    -- Dimensión Rango Etario Agente
     INSERT INTO [DB_LOPERS].BI_Rango_Etario_Agente (Descripcion)
     VALUES 
         ('Entre 25 y 35 años'),
         ('Entre 35 y 50 años'),
         ('Mayores de 50 años');
 
-    -- Dimensión Canal de Venta
+
     INSERT INTO [DB_LOPERS].BI_Canal_Venta (ID_Canal_Venta, Descripcion)
     SELECT ID_Canal_Venta, Descripcion FROM [DB_LOPERS].Canal_Venta;
 
-    -- Dimensión Estado Propuesta
+
     INSERT INTO [DB_LOPERS].BI_Estado_Propuesta (ID_Estado_Propuesta, Descripcion)
     SELECT ID_Estado_Propuesta, Descripcion FROM [DB_LOPERS].Estado_Propuesta;
 
-    -- Dimensión Aspecto
+
     INSERT INTO [DB_LOPERS].BI_Aspecto (ID_Aspecto, Descripcion)
     SELECT ID_Aspecto, Descripcion FROM [DB_LOPERS].Aspecto;
 
-    -- Dimensión Tipo Servicio
+
     INSERT INTO [DB_LOPERS].BI_Tipo_Servicio (ID_Tipo_Servicio, Descripcion)
     VALUES 
         (1, 'Venta Directa'),
         (2, 'Propuesta a Medida');
 
     
-    -- B. Migración de Tablas de Hechos (con GROUP BY)
-
-    -- Hecho Ventas
+    
     INSERT INTO [DB_LOPERS].BI_Hecho_Venta (ID_Rango_Etario_Cliente, ID_Rango_Etario_Agente, ID_Canal_Venta, ID_Tiempo, ID_Tipo_Servicio, Cant_Ventas, Suma_Facturacion)
     SELECT 
         (SELECT ID_Rango_Etario FROM [DB_LOPERS].BI_Rango_Etario_Cliente WHERE Descripcion = 
@@ -305,7 +296,6 @@ BEGIN
         CASE WHEN vp.Propuesta_Nro_Propuesta IS NOT NULL THEN 2 ELSE 1 END;
 
 
-    -- Hecho Solicitudes
     INSERT INTO [DB_LOPERS].BI_Hecho_Solicitud (ID_Rango_Etario_Cliente, ID_Rango_Etario_Agente, ID_Tiempo_Solicitud, Cant_Solicitudes, Suma_Anticipacion_Dias, Prom_Anticipacion_Dias, Suma_Presupuesto_Estimado)
     SELECT 
         (SELECT ID_Rango_Etario FROM [DB_LOPERS].BI_Rango_Etario_Cliente WHERE Descripcion = 
@@ -344,7 +334,6 @@ BEGIN
         CAST(FORMAT(s.Fecha_Solicitud, 'yyyyMMdd') AS bigint);
 
 
-    -- Hecho Propuestas
     INSERT INTO [DB_LOPERS].BI_Hecho_Propuesta (ID_Rango_Etario_Agente, ID_Estado_Propuesta, ID_Tiempo_Emision, ID_Tiempo_Solicitud, ID_Tiempo_Viaje_Inicio, Cant_Propuestas, Cant_Aceptadas, Suma_Cotizacion, Prom_Cotizacion, Suma_Desvio_Presupuesto, Prom_Desvio_Presupuesto, Suma_Dias_Respuesta, Prom_Dias_Respuesta)
     SELECT 
         (SELECT ID_Rango_Etario FROM [DB_LOPERS].BI_Rango_Etario_Agente WHERE Descripcion = 
@@ -380,8 +369,6 @@ BEGIN
         CAST(FORMAT(s.Fecha_Solicitud, 'yyyyMMdd') AS bigint),
         CAST(FORMAT(p.Fecha_Desde, 'yyyyMMdd') AS bigint);
 
-
-    -- Hecho Encuestas
     INSERT INTO [DB_LOPERS].BI_Hecho_Encuesta (ID_Rango_Etario_Cliente, ID_Rango_Etario_Agente, ID_Tiempo, ID_Aspecto, Cant_Encuestas, Suma_Puntaje, Prom_Puntaje)
     SELECT 
         (SELECT ID_Rango_Etario FROM [DB_LOPERS].BI_Rango_Etario_Cliente WHERE Descripcion = 
@@ -424,7 +411,6 @@ BEGIN
 END;
 GO
 
--- Ejecutamos la migracion al modelo BI
 EXEC [DB_LOPERS].Migrar_Modelo_BI;
 GO
 
@@ -433,7 +419,6 @@ GO
 -- CREACIÓN DE VISTAS
 -- ====================================================================================
 
--- Ticket promedio mensual según rango etario del cliente y canal de venta.
 CREATE VIEW [DB_LOPERS].v_ticket_promedio_mensual AS
 SELECT 
     t.Anio AS [Año],
@@ -448,7 +433,6 @@ JOIN [DB_LOPERS].BI_Canal_Venta cv ON hv.ID_Canal_Venta = cv.ID_Canal_Venta
 GROUP BY t.Anio, t.Mes, c.Descripcion, cv.Descripcion;
 GO
 
--- Porcentaje de facturación correspondiente a cada tipo de servicio por cuatrimestre y año.
 CREATE VIEW [DB_LOPERS].v_distribucion_facturacion_cuatrimestral AS
 SELECT 
     t.Anio AS [Año],
@@ -462,7 +446,6 @@ JOIN [DB_LOPERS].BI_Tipo_Servicio ts ON hv.ID_Tipo_Servicio = ts.ID_Tipo_Servici
 GROUP BY t.Anio, t.Cuatrimestre, ts.Descripcion;
 GO
 
--- Ranking de solicitudes realizadas por temporadas del año y rango etario del cliente.
 CREATE VIEW [DB_LOPERS].v_ranking_solicitudes_por_temporada AS
 SELECT 
     t.Anio AS [Año],
@@ -475,7 +458,6 @@ JOIN [DB_LOPERS].BI_Rango_Etario_Cliente c ON hs.ID_Rango_Etario_Cliente = c.ID_
 GROUP BY t.Anio, t.Temporada, c.Descripcion;
 GO
 
--- Anticipación promedio de días de la solicitud de viaje por rango etario y cuatrimestre.
 CREATE VIEW [DB_LOPERS].v_anticipacion_promedio_solicitudes AS
 SELECT 
     t.Anio AS [Año],
@@ -488,7 +470,6 @@ JOIN [DB_LOPERS].BI_Rango_Etario_Cliente c ON hs.ID_Rango_Etario_Cliente = c.ID_
 GROUP BY t.Anio, t.Cuatrimestre, c.Descripcion;
 GO
 
--- Tasa de aceptación de propuestas emitidas por cuatrimestre.
 CREATE VIEW [DB_LOPERS].v_tasa_aceptacion_propuestas AS
 SELECT 
     t.Anio AS [Año],
@@ -499,7 +480,6 @@ JOIN [DB_LOPERS].BI_Tiempo t ON hp.ID_Tiempo_Emision = t.ID_Tiempo
 GROUP BY t.Anio, t.Cuatrimestre;
 GO
 
--- Importe promedio de cotización de propuestas agrupado por temporada de inicio de viaje.
 CREATE VIEW [DB_LOPERS].v_cotizacion_promedio_por_temporada AS
 SELECT 
     t.Anio AS [Año Viaje],
@@ -510,7 +490,6 @@ JOIN [DB_LOPERS].BI_Tiempo t ON hp.ID_Tiempo_Viaje_Inicio = t.ID_Tiempo
 GROUP BY t.Anio, t.Temporada;
 GO
 
--- Tiempo promedio de respuesta (en días) entre solicitud y emisión por rango etario de agente y mes.
 CREATE VIEW [DB_LOPERS].v_tiempo_promedio_respuesta AS
 SELECT 
     t.Anio AS [Año Solicitud],
@@ -523,7 +502,6 @@ JOIN [DB_LOPERS].BI_Rango_Etario_Agente a ON hp.ID_Rango_Etario_Agente = a.ID_Ra
 GROUP BY t.Anio, t.Mes, a.Descripcion;
 GO
 
--- Desvío de presupuesto promedio entre el estimado y el propuesto final por cuatrimestre de emisión.
 CREATE VIEW [DB_LOPERS].v_desvio_presupuesto AS
 SELECT 
     t.Anio AS [Año Emision],
@@ -534,7 +512,6 @@ JOIN [DB_LOPERS].BI_Tiempo t ON hp.ID_Tiempo_Emision = t.ID_Tiempo
 GROUP BY t.Anio, t.Cuatrimestre;
 GO
 
--- Ranking de aspectos evaluados (mejor y peor valorados) por cuatrimestre.
 CREATE VIEW [DB_LOPERS].v_ranking_aspectos_valorados AS
 SELECT 
     t.Anio AS [Año],
@@ -547,7 +524,6 @@ JOIN [DB_LOPERS].BI_Aspecto asp ON he.ID_Aspecto = asp.ID_Aspecto
 GROUP BY t.Anio, t.Cuatrimestre, asp.Descripcion;
 GO
 
--- Satisfacción promedio obtenida en encuestas según rango etario del agente y mes.
 CREATE VIEW [DB_LOPERS].v_satisfaccion_promedio_por_agente AS
 SELECT 
     t.Anio AS [Año],
