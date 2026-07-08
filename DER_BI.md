@@ -12,20 +12,14 @@ direction LR
         nvarchar(50) Temporada
     }
 
-    BI_Cliente {
-        bigint ID_Cliente PK
-        nvarchar(255) Dni
-        nvarchar(255) Nombre
-        nvarchar(255) Apellido
-        nvarchar(50) Rango_Etario_Cliente
+    BI_Rango_Etario_Cliente {
+        int ID_Rango_Etario PK
+        nvarchar(50) Descripcion
     }
 
-    BI_Agente {
-        bigint Legajo PK
-        nvarchar(255) Dni
-        nvarchar(255) Nombre
-        nvarchar(255) Apellido
-        nvarchar(50) Rango_Etario_Agente
+    BI_Rango_Etario_Agente {
+        int ID_Rango_Etario PK
+        nvarchar(50) Descripcion
     }
 
     BI_Tipo_Servicio {
@@ -49,67 +43,73 @@ direction LR
     }
 
     BI_Hecho_Venta {
-        bigint ID_Cliente FK
-        bigint Legajo_Agente FK
+        int ID_Rango_Etario_Cliente FK
+        int ID_Rango_Etario_Agente FK
         bigint ID_Canal_Venta FK
         bigint ID_Tiempo FK
         bigint ID_Tipo_Servicio FK
-        decimal Importe_Total
         int Cant_Ventas
+        decimal Suma_Facturacion
     }
 
     BI_Hecho_Solicitud {
-        bigint ID_Cliente FK
-        bigint Legajo_Agente FK
+        int ID_Rango_Etario_Cliente FK
+        int ID_Rango_Etario_Agente FK
         bigint ID_Tiempo_Solicitud FK
-        int Anticipacion_Dias
         int Cant_Solicitudes
-        decimal Presupuesto_Estimado
+        int Suma_Anticipacion_Dias
+        decimal Prom_Anticipacion_Dias
+        decimal Suma_Presupuesto_Estimado
     }
 
     BI_Hecho_Propuesta {
-        bigint Legajo_Agente FK
+        int ID_Rango_Etario_Agente FK
         bigint ID_Estado_Propuesta FK
         bigint ID_Tiempo_Emision FK
         bigint ID_Tiempo_Solicitud FK
         bigint ID_Tiempo_Viaje_Inicio FK
-        decimal Importe_Total
-        decimal Desvio_Presupuesto
-        int Tiempo_Respuesta_Dias
         int Cant_Propuestas
-        int Aceptada
+        int Cant_Aceptadas
+        decimal Suma_Cotizacion
+        decimal Prom_Cotizacion
+        decimal Suma_Desvio_Presupuesto
+        decimal Prom_Desvio_Presupuesto
+        int Suma_Dias_Respuesta
+        decimal Prom_Dias_Respuesta
     }
 
     BI_Hecho_Encuesta {
-        bigint ID_Cliente FK
-        bigint Legajo_Agente FK
+        int ID_Rango_Etario_Cliente FK
+        int ID_Rango_Etario_Agente FK
         bigint ID_Tiempo FK
         bigint ID_Aspecto FK
-        int Puntaje
+        int Cant_Encuestas
+        int Suma_Puntaje
+        decimal Prom_Puntaje
     }
 
     %% Relaciones de BI_Hecho_Venta (Estrella 1)
-    BI_Cliente ||--o{ BI_Hecho_Venta : "registra"
-    BI_Agente ||--o{ BI_Hecho_Venta : "gestiona"
+    BI_Rango_Etario_Cliente ||--o{ BI_Hecho_Venta : "registra"
+    BI_Rango_Etario_Agente ||--o{ BI_Hecho_Venta : "gestiona"
     BI_Canal_Venta ||--o{ BI_Hecho_Venta : "canaliza"
     BI_Tiempo ||--o{ BI_Hecho_Venta : "ocurre en"
     BI_Tipo_Servicio ||--o{ BI_Hecho_Venta : "clasifica"
 
     %% Relaciones de BI_Hecho_Solicitud (Estrella 2)
-    BI_Cliente ||--o{ BI_Hecho_Solicitud : "solicita"
-    BI_Agente ||--o{ BI_Hecho_Solicitud : "recibe"
+    BI_Rango_Etario_Cliente ||--o{ BI_Hecho_Solicitud : "solicita"
+    BI_Rango_Etario_Agente ||--o{ BI_Hecho_Solicitud : "recibe"
     BI_Tiempo ||--o{ BI_Hecho_Solicitud : "creada en"
 
     %% Relaciones de BI_Hecho_Propuesta (Estrella 3)
-    BI_Agente ||--o{ BI_Hecho_Propuesta : "elabora"
+    BI_Rango_Etario_Agente ||--o{ BI_Hecho_Propuesta : "elabora"
     BI_Estado_Propuesta ||--o{ BI_Hecho_Propuesta : "estado de"
     BI_Tiempo ||--o{ BI_Hecho_Propuesta : "emitida en"
     BI_Tiempo ||--o{ BI_Hecho_Propuesta : "solicitada en"
     BI_Tiempo ||--o{ BI_Hecho_Propuesta : "viaja en"
 
     %% Relaciones de BI_Hecho_Encuesta (Estrella 4)
-    BI_Cliente ||--o{ BI_Hecho_Encuesta : "responde"
-    BI_Agente ||--o{ BI_Hecho_Encuesta : "evaluado en"
+    BI_Rango_Etario_Cliente ||--o{ BI_Hecho_Encuesta : "responde"
+    BI_Rango_Etario_Agente ||--o{ BI_Hecho_Encuesta : "evaluado en"
     BI_Tiempo ||--o{ BI_Hecho_Encuesta : "realizada en"
     BI_Aspecto ||--o{ BI_Hecho_Encuesta : "califica"
 ```

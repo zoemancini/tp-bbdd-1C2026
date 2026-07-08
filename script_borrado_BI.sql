@@ -70,11 +70,11 @@ IF OBJECT_ID('DB_LOPERS.BI_Canal_Venta', 'U') IS NOT NULL
 IF OBJECT_ID('DB_LOPERS.BI_Tipo_Servicio', 'U') IS NOT NULL
     DROP TABLE [DB_LOPERS].BI_Tipo_Servicio;
 
-IF OBJECT_ID('DB_LOPERS.BI_Agente', 'U') IS NOT NULL
-    DROP TABLE [DB_LOPERS].BI_Agente;
+IF OBJECT_ID('DB_LOPERS.BI_Rango_Etario_Agente', 'U') IS NOT NULL
+    DROP TABLE [DB_LOPERS].BI_Rango_Etario_Agente;
 
-IF OBJECT_ID('DB_LOPERS.BI_Cliente', 'U') IS NOT NULL
-    DROP TABLE [DB_LOPERS].BI_Cliente;
+IF OBJECT_ID('DB_LOPERS.BI_Rango_Etario_Cliente', 'U') IS NOT NULL
+    DROP TABLE [DB_LOPERS].BI_Rango_Etario_Cliente;
 
 IF OBJECT_ID('DB_LOPERS.BI_Tiempo', 'U') IS NOT NULL
     DROP TABLE [DB_LOPERS].BI_Tiempo;
